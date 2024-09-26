@@ -1,0 +1,51 @@
+
+services:
+
+  service1:
+      build:
+        context: ./service1
+        dockerfile: Dockerfile
+      environment:
+      - LOKI_HOST=http://loki:3100/loki/api/v1/push
+      networks:
+        - logging-spring-loki
+        
+  service2:
+      build:
+        context: ./service2
+        dockerfile: Dockerfile
+      environment:
+      - LOKI_HOST=http://loki:3100/loki/api/v1/push
+      networks:
+        - logging-spring-loki
+
+  loki:
+    image: grafana/loki
+    container_name: loki
+    extra_hosts: ['host.docker.internal:host-gateway']
+    command: [ "-config.file=/etc/loki/local-config.yaml" ]
+    ports:
+        - "3100:3100"                                   # loki needs to be exposed so it receives logs
+    networks:
+      - logging-spring-loki
+
+  grafana:
+    image: grafana/grafana
+    extra_hosts: ['host.docker.internal:host-gateway']
+    volumes:
+        - ./docker/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+        - ./docker/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+    environment:
+        - GF_AUTH_ANONYMOUS_ENABLED=true
+        - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+        - GF_AUTH_DISABLE_LOGIN_FORM=true
+    ports:
+        - "3000:3000"
+    networks:
+      - logging-spring-loki
+      
+networks:
+  logging-spring-loki:
+    driver: bridge
+# Prometheus: http://localhost:9090/
+# Grafana: http://localhost:3000/
