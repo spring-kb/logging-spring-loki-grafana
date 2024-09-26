@@ -1,10 +1,13 @@
 
+Simple project to log using loki and grafana
 # Run
+```json
 cd service1/
 ./mvnw spring-boot:run -Dspring-boot.run.arguments="--LOKI_HOST=http://localhost:3100/loki/api/v1/push"
 
 cd service2/
 ./mvnw spring-boot:run -Dspring-boot.run.arguments="--LOKI_HOST=http://localhost:3100/loki/api/v1/push"
+```
 
 Start
 ``` bash
